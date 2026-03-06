@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ship Inspector</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
+
+:root{
+  --bg:#0f0f11;--surface:#1a1a1f;--surface2:#24242b;--border:#2e2e38;
+  --accent:#00d4ff;--accent2:#7c3aed;--success:#22c55e;--danger:#ef4444;--warn:#f59e0b;
+  --text:#e8e8f0;--muted:#6b6b80;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  --hh:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden}
+
+/* ── HEADER ── */
+header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  height:var(--hh);display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;position:sticky;top:0;z-index:200
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em}
+.logo-sub{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.op-badge{font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:3px 8px;border-radius:4px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:4px;opacity:.3;transition:opacity .2s}
+.admin-btn:hover,.admin-btn:active{opacity:1}
+
+/* ── SCREENS ── */
+.screen{display:none}.screen.active{display:block}
+
+/* ── SHARED LAYOUT ── */
+.page{max-width:560px;margin:0 auto;padding:24px 16px 80px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px}
+.card h2{font-size:19px;font-weight:700;margin-bottom:6px}
+.card>p,.card-sub{color:var(--muted);font-size:13px;margin-bottom:20px;line-height:1.5}
+.section-title{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px}
+.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* forms */
+.form-group{margin-bottom:14px}
+.flabel{display:block;font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+input[type=text],input[type=date],input[type=password],input[type=number]{
+  width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:15px;
+  outline:none;transition:border-color .2s;-webkit-appearance:none
+}
+input:focus{border-color:var(--accent)}
+input.err{border-color:var(--danger)!important}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:8px;border:none;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;touch-action:manipulation;width:100%}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#0099bb);color:#000;font-size:15px;padding:14px}
+.btn-primary:active{opacity:.85}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:13px;padding:11px}
+.btn-secondary:active{border-color:var(--accent)}
+.btn-success{background:var(--success);color:#000;font-size:15px;padding:14px}
+.btn-danger{background:var(--danger);color:#fff;font-size:13px;padding:10px}
+.btn-warn{background:var(--warn);color:#000;font-size:13px;padding:10px}
+.btn-ghost{background:none;border:1px dashed var(--border);color:var(--muted);font-size:13px;padding:9px}
+.btn-ghost:active{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-sm{width:auto;padding:6px 14px;font-size:12px}
+input[type=file]{display:none}
+
+/* ── ADMIN: product config ── */
+.prod-admin-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.prod-admin-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;background:var(--surface2);border-bottom:1px solid var(--border);
+  cursor:pointer;touch-action:manipulation
+}
+.prod-admin-title{font-size:14px;font-weight:700}
+.prod-admin-subtitle{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+.prod-admin-chevron{font-size:12px;color:var(--muted);transition:transform .2s}
+.prod-admin-body{display:none;padding:14px}
+.prod-admin-body.open{display:block}
+.photo-count-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.photo-count-row label{flex:1;font-size:13px;color:var(--text)}
+.count-input{width:70px!important;text-align:center;font-size:18px;font-weight:700;font-family:var(--mono);color:var(--accent);padding:8px}
+
+/* photo name rows */
+.photo-name-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.photo-name-row input[type=text]{padding:7px 10px;font-size:13px;flex:1}
+/* sample thumbnail in admin */
+.samp-lbl{
+  flex-shrink:0;width:44px;height:36px;background:var(--bg);border:1px dashed var(--border);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;position:relative;overflow:hidden
+}
+.samp-lbl img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.samp-lbl:active{border-color:var(--accent)}
+
+/* ── SELECT PRODUCT ── */
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.prod-card{
+  background:var(--surface);border:2px solid var(--border);border-radius:12px;
+  padding:14px 12px;cursor:pointer;transition:all .15s;touch-action:manipulation;position:relative
+}
+.prod-card:active,.prod-card.sel{border-color:var(--accent);background:rgba(0,212,255,.07)}
+.prod-card.has-done{border-color:rgba(34,197,94,.4)}
+.prod-card-num{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px}
+.prod-card-name{font-size:14px;font-weight:700}
+.prod-card-pn{font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:3px}
+.prod-card-count{font-size:10px;color:var(--muted);margin-top:3px}
+.prod-done-badge{position:absolute;top:7px;right:7px;font-size:11px}
+
+/* ── SHOOT SCREEN ── */
+.shoot-wrap{max-width:600px;margin:0 auto;padding:14px 14px 160px}
+.prod-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.prod-bar-left{}
+.prod-bar-label{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:2px}
+.prod-bar-name{font-size:15px;font-weight:700}
+.prod-bar-pn{font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:1px}
+.sn-group{display:flex;flex-direction:column;gap:3px;min-width:130px}
+.sn-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--accent);font-family:var(--mono);font-size:13px;font-weight:600;outline:none;width:100%;-webkit-appearance:none;transition:border-color .2s}
+.sn-input:focus{border-color:var(--accent)}
+.sn-input.err{border-color:var(--danger)}
+
+/* progress */
+.prog-mini{margin-bottom:12px}
+.prog-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.prog-lbl{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.prog-pct{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent)}
+.prog-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s}
+
+/* checklist */
+.checklist-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.cl-head{padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.cl-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;touch-action:manipulation}
+.cl-item:last-child{border-bottom:none}
+.cl-item:active,.cl-item.cur{background:rgba(0,212,255,.06)}
+.cl-item.done-item{background:rgba(34,197,94,.04)}
+.cl-item.extra-item{background:rgba(124,58,237,.04)}
+.cl-status{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--border);transition:all .2s}
+.cl-item.done-item .cl-status{background:var(--success);border-color:var(--success);color:#000;font-weight:700}
+.cl-item.extra-item.done-item .cl-status{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.cl-item.cur .cl-status{border-color:var(--accent);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.4)}50%{box-shadow:0 0 0 5px rgba(0,212,255,0)}}
+.cl-name{flex:1;font-size:13px;font-weight:500}
+.cl-name.extra-name{color:var(--accent2)}
+.cl-thumb{width:44px;height:33px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0}
+.cl-del{background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px 5px;flex-shrink:0;touch-action:manipulation}
+.cl-del:active{color:var(--danger)}
+
+/* BOTTOM BARS */
+.mob-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;z-index:150}
+.mob-bar-row{display:flex;gap:8px}
+.mob-sample-btn{flex-shrink:0;width:50px;height:50px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;position:relative;overflow:hidden;touch-action:manipulation}
+.mob-sample-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mob-shoot-lbl{flex:1;height:50px;background:linear-gradient(135deg,var(--accent),#0099bb);color:#000;border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;touch-action:manipulation}
+.mob-shoot-lbl:active{transform:scale(.97)}
+.mob-gallery-lbl{flex-shrink:0;width:50px;height:50px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;touch-action:manipulation}
+.mob-extra-lbl{flex:1;height:40px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.4);color:var(--accent2);border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;touch-action:manipulation}
+.mob-extra-lbl:active{opacity:.8}
+
+.save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--success);padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;z-index:160}
+.save-bar-info{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center}
+
+/* SAMPLE OVERLAY */
+.samp-overlay{display:none;position:fixed;inset:0;z-index:500;background:#000;flex-direction:column}
+.samp-overlay.open{display:flex}
+.samp-ov-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));background:rgba(0,0,0,.9);position:absolute;top:0;left:0;right:0;z-index:10}
+.samp-ov-title{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600}
+.samp-ov-close{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:50%;width:34px;height:34px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.samp-ov-img{flex:1;display:flex;align-items:center;justify-content:center;padding:68px 0 88px}
+.samp-ov-img img{max-width:100%;max-height:100%;object-fit:contain}
+.samp-ov-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:13px}
+.samp-ov-foot{position:absolute;bottom:0;left:0;right:0;padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,.9);display:flex;gap:8px}
+.ov-shoot{flex:1;height:50px;background:linear-gradient(135deg,var(--accent),#0099bb);color:#000;border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;touch-action:manipulation}
+.ov-shoot:active{transform:scale(.97)}
+.ov-gallery{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;font-size:20px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
+
+/* HISTORY */
+.hist-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px}
+.hist-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-name{font-size:13px;font-weight:600}
+.hist-meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+.hist-btn{background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);flex-shrink:0}
+.hist-empty{padding:18px;text-align:center;color:var(--muted);font-size:12px}
+
+/* ADMIN SCREEN */
+.admin-wrap{max-width:620px;margin:0 auto;padding:20px 14px 80px}
+.admin-banner{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--warn);display:flex;gap:10px;align-items:flex-start}
+
+/* PASSWORD MODAL */
+.psw-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+.psw-overlay.open{display:flex}
+.psw-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:340px}
+.psw-box h3{font-size:17px;font-weight:700;margin-bottom:6px}
+.psw-box p{font-size:13px;color:var(--muted);margin-bottom:20px}
+.psw-input-wrap{position:relative;margin-bottom:14px}
+.psw-input-wrap input{padding-right:44px}
+.psw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px}
+.psw-error{font-size:12px;color:var(--danger);margin-top:-8px;margin-bottom:12px;display:none}
+.psw-error.show{display:block}
+
+/* SCANNER OVERLAY */
+.scan-overlay{display:none;position:fixed;inset:0;z-index:700;background:#000;flex-direction:column}
+.scan-overlay.open{display:flex}
+.scan-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top));background:rgba(0,0,0,.85);position:absolute;top:0;left:0;right:0;z-index:10}
+.scan-title{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600}
+.scan-close{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:50%;width:34px;height:34px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.scan-video-wrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#scanVideo{width:100%;height:100%;object-fit:cover}
+.scan-finder{position:absolute;width:220px;height:220px;border:2px solid var(--accent);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.5)}
+.scan-corner{position:absolute;width:20px;height:20px;border-color:var(--accent);border-style:solid}
+.scan-corner.tl{top:-1px;left:-1px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.scan-corner.tr{top:-1px;right:-1px;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.scan-corner.bl{bottom:-1px;left:-1px;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.scan-corner.br{bottom:-1px;right:-1px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.scan-hint{position:absolute;bottom:100px;left:0;right:0;text-align:center;color:rgba(255,255,255,.7);font-size:13px}
+.scan-result-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.85);align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:24px}
+.scan-result-overlay.show{display:flex}
+.scan-result-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;width:100%;max-width:360px}
+.scan-result-box h3{font-size:16px;font-weight:700;margin-bottom:12px;color:var(--accent)}
+.scan-field{margin-bottom:8px}
+.scan-field-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.scan-field-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text)}
+.scan-err{color:var(--danger);font-size:13px;text-align:center}
+.scan-footer{display:flex;flex-direction:column;gap:8px;width:100%;max-width:360px}
+
+/* LABEL SCREEN */
+.label-wrap{max-width:480px;margin:0 auto;padding:24px 16px 80px}
+.label-preview{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:24px;margin-bottom:16px;display:flex;flex-direction:column;align-items:center;gap:16px
+}
+.label-preview h3{font-size:16px;font-weight:700;align-self:flex-start}
+.qr-box{background:#fff;border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:center}
+.label-data{width:100%;display:flex;flex-direction:column;gap:6px}
+.label-row{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--border);padding-bottom:5px}
+.label-row:last-child{border-bottom:none}
+.label-key{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.label-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent)}
+.zebra-info{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:12px;font-size:12px;color:var(--warn);line-height:1.6}
+
+/* TOAST / FLASH */
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom) + 10px);left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s;z-index:9999;white-space:nowrap;max-width:92vw;text-align:center}
+.toast.show{opacity:1}
+.flash{position:fixed;inset:0;background:#fff;pointer-events:none;z-index:9999;opacity:0}
+.flash.go{opacity:.5;transition:opacity .08s ease-out}
+#captureCanvas{display:none}
+
+@media(min-width:560px){
+  .prod-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ── TABLET / DESKTOP (≥768px) ── */
+@media(min-width:768px){
+  .page{max-width:760px}
+
+  /* Shoot screen: 2-column layout */
+  .shoot-wrap{
+    max-width:1100px;
+    display:grid;
+    grid-template-columns:1fr 340px;
+    gap:20px;
+    padding:20px 24px 40px;
+    align-items:start;
+  }
+  .shoot-left{ grid-column:1; }
+  .shoot-right{
+    grid-column:2;
+    position:sticky;
+    top:calc(var(--hh) + 16px);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  /* Hide mobile bottom bars on tablet */
+  .mob-bar{ display:none !important; }
+  .save-bar{
+    position:static !important;
+    border:2px solid var(--success);
+    border-radius:12px;
+    padding:14px;
+    background:var(--surface);
+  }
+
+  /* Tablet camera panel */
+  .tablet-cam-panel{
+    display:flex !important;
+    flex-direction:column;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .tablet-cam-header{
+    padding:10px 14px;
+    background:var(--surface2);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .tablet-cam-title{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .tablet-shot-name{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tablet-sample-box{
+    aspect-ratio:4/3;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;border-bottom:1px solid var(--border);
+  }
+  .tablet-sample-box img{width:100%;height:100%;object-fit:cover}
+  .tablet-sample-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:12px;padding:16px;text-align:center}
+  .tablet-cam-controls{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+  .tablet-shoot-lbl{
+    width:100%;height:52px;
+    background:linear-gradient(135deg,var(--accent),#0099bb);
+    color:#000;border:none;border-radius:8px;
+    font-family:var(--sans);font-size:16px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    cursor:pointer;touch-action:manipulation;
+  }
+  .tablet-shoot-lbl:active{opacity:.85}
+  .tablet-gallery-lbl{
+    width:100%;height:40px;
+    background:var(--surface2);border:1px dashed var(--border);
+    border-radius:8px;color:var(--muted);font-size:13px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    cursor:pointer;touch-action:manipulation;
+  }
+  .tablet-gallery-lbl:active{border-color:var(--accent);color:var(--accent)}
+  .tablet-extra-lbl{
+    width:100%;height:38px;
+    background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);
+    border-radius:8px;color:var(--accent2);font-size:12px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    cursor:pointer;touch-action:manipulation;
+  }
+  .tablet-extra-lbl:active{opacity:.8}
+  .tablet-nav-row{display:flex;gap:8px}
+  .tablet-nav-row .btn{flex:1;padding:10px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="toast" id="toast"></div>
+<canvas id="captureCanvas"></canvas>
+
+<!-- PASSWORD MODAL -->
+<div class="psw-overlay" id="pswOverlay">
+  <div class="psw-box">
+    <h3>🔒 Area Amministratore</h3>
+    <p>Inserisci la password per accedere alla configurazione.</p>
+    <div class="psw-input-wrap">
+      <input type="password" id="pswInput" placeholder="Password…" onkeydown="if(event.key==='Enter')checkAdminPsw()">
+      <button class="psw-eye" onclick="togglePswEye()" id="pswEye">👁️</button>
+    </div>
+    <div class="psw-error" id="pswError">Password errata. Riprova.</div>
+    <button class="btn btn-primary" onclick="checkAdminPsw()" style="margin-bottom:8px">Accedi</button>
+    <button class="btn btn-secondary" onclick="closePswModal()">Annulla</button>
+  </div>
+</div>
+
+<!-- SAMPLE OVERLAY -->
+<div class="samp-overlay" id="sampOverlay">
+  <div class="samp-ov-head">
+    <span class="samp-ov-title" id="ovTitle">—</span>
+    <button class="samp-ov-close" onclick="closeOverlay()">✕</button>
+  </div>
+  <div class="samp-ov-img" id="ovImgWrap"><div class="samp-ov-empty"><span style="font-size:44px">🖼️</span><span>Nessuna foto campione</span></div></div>
+  <div class="samp-ov-foot">
+    <label class="ov-shoot"><span>⬤</span> SCATTA<input type="file" accept="image/*" capture="environment" onchange="handleCapture(event,true)"></label>
+    <label class="ov-gallery">📁<input type="file" accept="image/*" onchange="handleCapture(event,true)"></label>
+  </div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📦</div>
+    <div><div class="logo-text">SHIP INSPECTOR</div><div class="logo-sub">Controllo spedizioni</div></div>
+  </div>
+  <div class="hdr-right">
+    <span class="op-badge" id="opBadge">—</span>
+    <button class="admin-btn" onclick="goAdmin()" title="Amministrazione">⚙️</button>
+  </div>
+</header>
+
+<!-- ════════ SCREEN: SETUP OPERATOR ════════ -->
+<div class="screen active" id="scrSetup">
+  <div class="page">
+    <div class="card">
+      <h2>Nuova Sessione</h2>
+      <p>Inserisci i tuoi dati per iniziare l'ispezione.</p>
+      <div class="form-group">
+        <label class="flabel">Nome Operatore</label>
+        <input type="text" id="opName" placeholder="es. Marco Rossi" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="flabel">Data</label>
+        <input type="date" id="dateInput">
+      </div>
+      <button class="btn btn-primary" onclick="confirmSetup()">Inizia →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNER OVERLAY -->
+<div class="scan-overlay" id="scanOverlay">
+  <div class="scan-header">
+    <span class="scan-title">📷 Scansiona Datamatrix</span>
+    <button class="scan-close" onclick="closeScanner()">✕</button>
+  </div>
+  <div class="scan-video-wrap">
+    <video id="scanVideo" autoplay playsinline muted></video>
+    <div class="scan-finder">
+      <div class="scan-corner tl"></div><div class="scan-corner tr"></div>
+      <div class="scan-corner bl"></div><div class="scan-corner br"></div>
+    </div>
+    <div class="scan-hint">Inquadra il datamatrix nell'area</div>
+  </div>
+  <!-- Result panel (shown after decode) -->
+  <div class="scan-result-overlay" id="scanResultOverlay">
+    <div class="scan-result-box" id="scanResultBox">
+      <h3>✓ Etichetta rilevata</h3>
+      <div id="scanResultFields"></div>
+    </div>
+    <div class="scan-err" id="scanErrMsg" style="display:none"></div>
+    <div class="scan-footer">
+      <button class="btn btn-primary" id="scanConfirmBtn" onclick="confirmScan()">Avvia ispezione →</button>
+      <button class="btn btn-secondary" onclick="retryScanner()">↺ Riscan</button>
+      <button class="btn btn-secondary" onclick="closeScanner()">✕ Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SCREEN: SELECT PRODUCT ════════ -->
+<div class="screen" id="scrProduct">
+  <div class="page">
+    <div class="card">
+      <h2>Seleziona Prodotto</h2>
+      <p id="selSubtitle" class="card-sub">—</p>
+      <!-- SCANDIT INPUT FIELD -->
+      <div style="margin-bottom:16px">
+        <label class="flabel">Scansiona etichetta prodotto</label>
+        <div style="position:relative">
+          <input type="text" id="dmxInput"
+            placeholder="Tocca qui, poi scansiona con Scandit…"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            style="padding-right:48px;font-family:var(--mono);font-size:13px"
+            oninput="onDmxInput(this.value)"
+            onfocus="this.select()">
+          <button onclick="pasteDmx()"
+            style="position:absolute;right:40px;top:50%;transform:translateY(-50%);background:var(--accent2);border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:5px;font-family:var(--sans)">INCOLLA</button>
+          <button onclick="document.getElementById('dmxInput').value='';document.getElementById('dmxInput').focus();onDmxInput('')"
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px">✕</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">
+          Tocca il campo → apri Scandit → inquadra il datamatrix. Il prodotto viene riconosciuto automaticamente.
+        </div>
+        <div id="dmxMatchBanner" style="display:none;margin-top:10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:10px 14px">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:3px">PRODOTTO RILEVATO</div>
+          <div id="dmxMatchName" style="font-size:15px;font-weight:700"></div>
+          <div id="dmxMatchDetails" style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:2px"></div>
+          <button class="btn btn-success" style="margin-top:10px;padding:11px;font-size:14px" onclick="confirmDmxMatch()">
+            Avvia ispezione →
+          </button>
+        </div>
+        <div id="dmxNoMatchBanner" style="display:none;margin-top:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--danger)">
+          ⚠️ Nessun prodotto trovato. Verifica il mapping in Admin o seleziona manualmente.
+          <div id="dmxRawFields" style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--muted);word-break:break-all"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-bottom:12px">— oppure seleziona manualmente —</div>
+      <div class="prod-grid" id="prodGrid"></div>
+      <button class="btn btn-secondary" onclick="goSetup()">← Cambia operatore</button>
+    </div>
+
+    <div id="histSection" style="display:none">
+      <div class="section-title">Salvati questa sessione</div>
+      <div class="hist-card" id="histList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SCREEN: SHOOT ════════ -->
+<div class="screen" id="scrShoot">
+  <div class="shoot-wrap">
+
+    <!-- LEFT COLUMN (always visible) -->
+    <div class="shoot-left">
+      <div class="prod-bar">
+        <div class="prod-bar-left">
+          <div class="prod-bar-label">PRODOTTO</div>
+          <div class="prod-bar-name" id="shootName">—</div>
+          <div class="prod-bar-pn"   id="shootPN">—</div>
+        </div>
+        <div class="sn-group">
+          <span class="flabel">Serial Number *</span>
+          <input class="sn-input" id="snInput" placeholder="Inserisci SN…" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onSNChange()">
+        </div>
+      </div>
+
+      <div class="prog-mini">
+        <div class="prog-row">
+          <span class="prog-lbl" id="progLbl">—</span>
+          <span class="prog-pct" id="progPct">0%</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+      </div>
+
+      <!-- Required photos -->
+      <div class="checklist-card">
+        <div class="cl-head">📋 FOTO RICHIESTE</div>
+        <div id="checklist"></div>
+      </div>
+
+      <!-- Additional photos -->
+      <div class="checklist-card">
+        <div class="cl-head">✨ FOTO ADDIZIONALI</div>
+        <div id="checklistExtra"></div>
+        <div style="padding:8px 14px">
+          <label class="btn btn-ghost" style="font-size:12px;padding:8px">
+            + Scatta foto addizionale
+            <input type="file" accept="image/*" capture="environment" onchange="handleExtraCapture(event)">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN — tablet only, hidden on mobile via CSS -->
+    <div class="shoot-right" style="display:none">
+
+      <!-- Camera / sample panel -->
+      <div class="tablet-cam-panel" style="display:none">
+        <div class="tablet-cam-header">
+          <span class="tablet-cam-title">📷 Acquisizione</span>
+          <span class="tablet-shot-name" id="tabletShotName">—</span>
+        </div>
+        <div class="tablet-sample-box" id="tabletSampleBox">
+          <div class="tablet-sample-empty"><span style="font-size:40px">🖼️</span><span>Nessuna foto campione</span></div>
+        </div>
+        <div class="tablet-cam-controls">
+          <label class="tablet-shoot-lbl">
+            <span>⬤</span> SCATTA FOTO
+            <input type="file" accept="image/*" capture="environment" onchange="handleCapture(event,false)">
+          </label>
+          <label class="tablet-gallery-lbl">
+            📁 Carica da galleria
+            <input type="file" accept="image/*" onchange="handleCapture(event,false)">
+          </label>
+          <label class="tablet-extra-lbl">
+            ✨ Foto addizionale libera
+            <input type="file" accept="image/*" capture="environment" onchange="handleExtraCapture(event)">
+          </label>
+        </div>
+      </div>
+
+      <!-- Save bar (tablet: inline in right col) -->
+      <div class="save-bar" id="saveBar" style="display:none">
+        <div class="save-bar-info" id="saveInfo">—</div>
+        <button class="btn btn-success" onclick="saveCycle()">💾 Salva ZIP e chiudi</button>
+        <button class="btn btn-secondary" onclick="backToProducts()">← Cambia prodotto</button>
+      </div>
+
+      <!-- Nav back button on tablet -->
+      <div class="tablet-nav-row">
+        <button class="btn btn-secondary" onclick="backToProducts()">← Cambia prodotto</button>
+      </div>
+
+    </div><!-- /shoot-right -->
+
+  </div><!-- /shoot-wrap -->
+
+  <!-- Mobile bar (required photos not done) — hidden on tablet -->
+  <div class="mob-bar" id="mobBar">
+    <div class="mob-bar-row">
+      <div class="mob-sample-btn" id="mobSample" onclick="openOverlay()"><span id="mobSampleIcon">🖼️</span></div>
+      <label class="mob-shoot-lbl"><span>⬤</span> SCATTA<input type="file" accept="image/*" capture="environment" onchange="handleCapture(event,false)"></label>
+      <label class="mob-gallery-lbl">📁<input type="file" accept="image/*" onchange="handleCapture(event,false)"></label>
+    </div>
+    <label class="mob-extra-lbl">
+      ✨ Foto addizionale libera
+      <input type="file" accept="image/*" capture="environment" onchange="handleExtraCapture(event)">
+    </label>
+  </div>
+
+  <!-- Mobile save bar — hidden on tablet -->
+  <div class="mob-save-bar" id="mobSaveBar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--success);padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));flex-direction:column;gap:8px;z-index:160">
+    <div class="save-bar-info" id="mobSaveInfo">—</div>
+    <button class="btn btn-success" onclick="saveCycle()">💾 Salva ZIP e chiudi</button>
+    <button class="btn btn-secondary" onclick="backToProducts()">← Cambia prodotto</button>
+  </div>
+
+</div>
+
+<!-- ════════ SCREEN: SAVING ════════ -->
+<div class="screen" id="scrSaving">
+  <div class="page" style="text-align:center;padding-top:60px">
+    <div style="font-size:52px;margin-bottom:16px">⏳</div>
+    <h2 style="margin-bottom:8px">Salvataggio…</h2>
+    <p style="color:var(--muted);font-size:13px" id="savingMsg">Generazione PDF e ZIP in corso.</p>
+  </div>
+</div>
+
+<!-- ════════ SCREEN: LABEL ════════ -->
+<div class="screen" id="scrLabel">
+  <div class="label-wrap">
+    <div class="label-preview">
+      <h3>🏷️ Etichetta Ispezione</h3>
+      <div class="qr-box" id="qrBox"></div>
+      <div class="label-data" id="labelData"></div>
+    </div>
+
+    <div class="zebra-info" id="zebraInfo">
+      ⚠️ Il file ZPL è pronto per la tua Zebra. Se è collegata in rete invia il file direttamente alla sua IP. Se è collegata via USB o driver Windows, apri il file con un editor di testo e incollalo nel software Zebra Setup Utilities o ZebraDesigner.
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+      <button class="btn btn-primary" onclick="downloadZPL()">🖨️ Scarica file ZPL per Zebra</button>
+      <button class="btn btn-secondary" onclick="printLabelBrowser()">🖨️ Stampa anteprima (browser)</button>
+      <button class="btn btn-secondary" onclick="goProducts()">→ Prossimo prodotto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SCREEN: ADMIN ════════ -->
+<div class="screen" id="scrAdmin">
+  <div class="admin-wrap">
+
+    <div class="admin-banner">
+      ⚙️
+      <span>Sezione Amministratore — configura i prodotti, il numero di foto e i campioni guida. Queste impostazioni vengono salvate nel browser.</span>
+    </div>
+
+    <div id="adminProdList"></div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+      <button class="btn btn-primary" onclick="saveAdminConfig()">✓ Salva configurazione</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" style="flex:1" onclick="exportConfig()">⬇ Esporta config</button>
+        <label class="btn btn-secondary" style="flex:1">⬆ Importa config<input type="file" accept=".json" onchange="importConfig(event)"></label>
+      </div>
+      <button class="btn btn-secondary" onclick="goProducts()">← Torna all'app</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  DEFAULT CONFIG — sovrascritto da localStorage
+// ══════════════════════════════════════════════════════
+const DEFAULT_CONFIG = [
+  {
+    label:'Prodotto 1', pn:'PN-001',
+    photos:[
+      {name:'Vista Frontale',    sample:null},
+      {name:'Vista Posteriore',  sample:null},
+      {name:'Vista Laterale SX', sample:null},
+      {name:'Vista Laterale DX', sample:null},
+      {name:'Etichetta Seriale', sample:null},
+      {name:'Imballo Interno',   sample:null},
+      {name:'Imballo Sigillato', sample:null},
+    ]
+  },
+  {label:'Prodotto 2', pn:'PN-002', photos:[{name:'Vista Frontale',sample:null},{name:'Vista Posteriore',sample:null},{name:'Etichetta Seriale',sample:null},{name:'Imballo Sigillato',sample:null}]},
+  {label:'Prodotto 3', pn:'PN-003', photos:[{name:'Vista Frontale',sample:null},{name:'Vista Posteriore',sample:null},{name:'Etichetta Seriale',sample:null},{name:'Imballo Sigillato',sample:null}]},
+  {label:'Prodotto 4', pn:'PN-004', photos:[{name:'Vista Frontale',sample:null},{name:'Vista Posteriore',sample:null},{name:'Etichetta Seriale',sample:null},{name:'Imballo Sigillato',sample:null}]},
+  {label:'Prodotto 5', pn:'PN-005', photos:[{name:'Vista Frontale',sample:null},{name:'Vista Posteriore',sample:null},{name:'Etichetta Seriale',sample:null},{name:'Imballo Sigillato',sample:null}]},
+];
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let cfg      = [];   // loaded from localStorage or DEFAULT_CONFIG
+let session  = {operator:'', date:''};
+let history  = [];   // cycles saved this session
+
+let curProd  = -1;
+let curPhoto = 0;    // index in required photos
+let reqPhotos= [];   // [{dataUrl,ext,timestamp}|null]
+let extraPhotos=[];  // [{dataUrl,ext,timestamp,name}]
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+(function init(){
+  loadConfig();
+  document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+})();
+
+function loadConfig(){
+  try{
+    const saved = localStorage.getItem('shipinspector_cfg');
+    if(saved) cfg = JSON.parse(saved);
+    else      cfg = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  }catch(e){ cfg = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+}
+
+function saveConfigToStorage(){
+  // Don't store sample images (too large) — store only names and counts
+  // Actually we do store them; localStorage might be limited but for typical use ok
+  try{ localStorage.setItem('shipinspector_cfg', JSON.stringify(cfg)); }
+  catch(e){ showToast('⚠️ Memoria piena, campioni non salvati'); }
+}
+
+// ══════════════════════════════════════════════════════
+//  SCREENS
+// ══════════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════════════
+//  SETUP
+// ══════════════════════════════════════════════════════
+function goSetup(){ showScreen('scrSetup'); }
+
+function confirmSetup(){
+  const op = document.getElementById('opName').value.trim();
+  const dt = document.getElementById('dateInput').value;
+  if(!op||!dt){ showToast('Compila nome e data!'); return; }
+  session = {operator:op, date:dt};
+  document.getElementById('opBadge').textContent = `${op}`;
+  goProducts();
+}
+
+// ══════════════════════════════════════════════════════
+//  PRODUCT SELECT
+// ══════════════════════════════════════════════════════
+function goProducts(){
+  if(!session.operator){ goSetup(); return; }
+  showScreen('scrProduct');
+  document.getElementById('selSubtitle').textContent = `${session.operator} · ${session.date}`;
+  renderProdGrid();
+  renderHistory();
+}
+
+function renderProdGrid(){
+  const grid = document.getElementById('prodGrid');
+  grid.innerHTML='';
+  cfg.forEach((p,i)=>{
+    const saved = history.filter(h=>h.prodIdx===i);
+    const card  = document.createElement('div');
+    card.className='prod-card'+(saved.length?' has-done':'');
+    card.onclick=()=>selectProduct(i);
+    card.innerHTML=`
+      <div class="prod-card-num">${p.label.toUpperCase()}</div>
+      <div class="prod-card-name">${p.label}</div>
+      <div class="prod-card-pn">${p.pn}</div>
+      <div class="prod-card-count">${p.photos.length} foto</div>
+      ${saved.length?`<span class="prod-done-badge">✅×${saved.length}</span>`:''}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderHistory(){
+  const sec  = document.getElementById('histSection');
+  const list = document.getElementById('histList');
+  if(!history.length){sec.style.display='none';return;}
+  sec.style.display='';
+  list.innerHTML='';
+  history.slice().reverse().forEach((h,i)=>{
+    const ri=history.length-1-i;
+    const item=document.createElement('div');
+    item.className='hist-item';
+    item.innerHTML=`
+      <div>
+        <div class="hist-name">${h.prodLabel}</div>
+        <div class="hist-meta">SN: ${h.sn} · ${h.reqCount} foto + ${h.extraCount} extra</div>
+      </div>
+      <button class="hist-btn" onclick="redownload(${ri})">↓ ZIP</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function isTablet(){ return window.innerWidth >= 768; }
+
+function selectProduct(i){
+  curProd     = i;
+  curPhoto    = 0;
+  reqPhotos   = cfg[i].photos.map(()=>null);
+  extraPhotos = [];
+  document.getElementById('snInput').value='';
+  document.getElementById('snInput').classList.remove('err');
+  showScreen('scrShoot');
+
+  // Show/hide right column on tablet
+  const right = document.querySelector('.shoot-right');
+  if(right) right.style.display = isTablet() ? 'flex' : 'none';
+
+  const p = cfg[i];
+  document.getElementById('shootName').textContent = p.label;
+  document.getElementById('shootPN').textContent   = p.pn;
+  renderChecklist();
+  renderExtraChecklist();
+  updateSampleUI();
+  updateProgress();
+  updateBars();
+}
+
+// Listen to resize to adapt layout on the fly
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('scrShoot').classList.contains('active')){
+    const right = document.querySelector('.shoot-right');
+    if(right) right.style.display = isTablet() ? 'flex' : 'none';
+    updateBars();
+  }
+});
+
+function backToProducts(){ goProducts(); }
+
+// ══════════════════════════════════════════════════════
+//  CHECKLIST (required)
+// ══════════════════════════════════════════════════════
+function renderChecklist(){
+  const list = document.getElementById('checklist');
+  list.innerHTML='';
+  cfg[curProd].photos.forEach((pt,j)=>{
+    const ph  = reqPhotos[j];
+    const cur = j===curPhoto;
+    const item= document.createElement('div');
+    item.className=`cl-item${ph?' done-item':''}${cur?' cur':''}`;
+    item.onclick=()=>selectPhoto(j);
+    item.innerHTML=`
+      <div class="cl-status">${ph?'✓':(cur?'●':'')}</div>
+      <div class="cl-name">${pt.name}</div>
+      ${ph?`<img class="cl-thumb" src="${ph.dataUrl}">
+            <button class="cl-del" onclick="delReqPhoto(event,${j})">✕</button>`:''}
+    `;
+    list.appendChild(item);
+  });
+}
+
+function selectPhoto(j){
+  curPhoto=j;
+  renderChecklist();
+  updateSampleUI();
+}
+
+function delReqPhoto(e,j){
+  e.stopPropagation();
+  if(!confirm('Eliminare?')) return;
+  reqPhotos[j]=null; curPhoto=j;
+  renderChecklist(); updateSampleUI(); updateProgress(); updateBars();
+}
+
+// ══════════════════════════════════════════════════════
+//  CHECKLIST (extra)
+// ══════════════════════════════════════════════════════
+function renderExtraChecklist(){
+  const list = document.getElementById('checklistExtra');
+  list.innerHTML='';
+  if(!extraPhotos.length){
+    list.innerHTML='<div style="padding:12px 14px;font-size:12px;color:var(--muted)">Nessuna foto aggiuntiva</div>';
+    return;
+  }
+  extraPhotos.forEach((ph,j)=>{
+    const item=document.createElement('div');
+    item.className='cl-item extra-item done-item';
+    item.innerHTML=`
+      <div class="cl-status">✓</div>
+      <div class="cl-name extra-name">${ph.name}</div>
+      <img class="cl-thumb" src="${ph.dataUrl}">
+      <button class="cl-del" onclick="delExtraPhoto(event,${j})">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function delExtraPhoto(e,j){
+  e.stopPropagation();
+  if(!confirm('Eliminare?')) return;
+  extraPhotos.splice(j,1);
+  renderExtraChecklist(); updateProgress(); updateBars();
+}
+
+// ══════════════════════════════════════════════════════
+//  PROGRESS & BARS
+// ══════════════════════════════════════════════════════
+function updateProgress(){
+  const tot  = reqPhotos.length;
+  const done = reqPhotos.filter(p=>p!==null).length;
+  const pct  = tot ? Math.round(done/tot*100) : 100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+  document.getElementById('progLbl').textContent=`${done}/${tot} obbligatorie · ${extraPhotos.length} extra`;
+}
+
+function updateBars(){
+  const allReq = reqPhotos.every(p=>p!==null);
+  const hasSN  = document.getElementById('snInput').value.trim()!=='';
+  const canSave= allReq && hasSN;
+  const tablet = isTablet();
+
+  // Tablet: show/hide right-col save bar
+  const tabletSaveBar = document.getElementById('saveBar');
+  if(tabletSaveBar) tabletSaveBar.style.display = (canSave && tablet) ? 'flex':'none';
+
+  // Mobile: show/hide fixed bottom bars
+  const mobBar     = document.getElementById('mobBar');
+  const mobSaveBar = document.getElementById('mobSaveBar');
+  if(mobBar)     mobBar.style.display     = (!tablet && !canSave) ? 'flex':'none';
+  if(mobSaveBar) mobSaveBar.style.display = (!tablet && canSave)  ? 'flex':'none';
+
+  // Tablet camera panel always visible when right col is shown
+  const tabletCam = document.querySelector('.tablet-cam-panel');
+  if(tabletCam) tabletCam.style.display = tablet ? 'flex':'none';
+
+  if(canSave){
+    const p=cfg[curProd];
+    const sn=document.getElementById('snInput').value.trim();
+    const info=`${p.label} · SN: ${sn} · ${reqPhotos.length} foto + ${extraPhotos.length} extra`;
+    const si=document.getElementById('saveInfo');     if(si) si.textContent=info;
+    const mi=document.getElementById('mobSaveInfo'); if(mi) mi.textContent=info;
+  }
+}
+
+function onSNChange(){
+  document.getElementById('snInput').classList.remove('err');
+  updateBars();
+}
+
+function updateSampleUI(){
+  const pt  = cfg[curProd]?.photos[curPhoto];
+  const url = pt?.sample || null;
+  const name= pt?.name || '—';
+
+  // Mobile: sample thumb button
+  const btn = document.getElementById('mobSample');
+  const ico = document.getElementById('mobSampleIcon');
+  if(btn){
+    if(url){
+      btn.style.backgroundImage=`url('${url}')`;
+      btn.style.backgroundSize='cover';
+      btn.style.backgroundPosition='center';
+      if(ico) ico.style.display='none';
+    } else {
+      btn.style.backgroundImage='';
+      if(ico) ico.style.display='';
+    }
+  }
+
+  // Tablet: sample box in right panel
+  const tabBox  = document.getElementById('tabletSampleBox');
+  const tabName = document.getElementById('tabletShotName');
+  if(tabBox){
+    tabBox.innerHTML = url
+      ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`
+      : `<div class="tablet-sample-empty"><span style="font-size:40px">🖼️</span><span>Nessuna foto campione</span></div>`;
+  }
+  if(tabName) tabName.textContent = name;
+
+  // Overlay title + image
+  const ovTitle = document.getElementById('ovTitle');
+  if(ovTitle) ovTitle.textContent = name;
+  const ovWrap = document.getElementById('ovImgWrap');
+  if(ovWrap){
+    ovWrap.innerHTML = url
+      ? `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain">`
+      : `<div class="samp-ov-empty"><span style="font-size:44px">🖼️</span><span>Nessuna foto campione</span></div>`;
+  }
+}
+
+// Keep old name as alias for backward compat
+function updateMobSample(){ updateSampleUI(); }
+
+// ══════════════════════════════════════════════════════
+//  CAPTURE
+// ══════════════════════════════════════════════════════
+function handleCapture(e, fromOverlay){
+  const f=e.target.files[0]; if(!f) return;
+  const ext=f.type==='image/png'?'png':'jpg';
+  const r=new FileReader();
+  r.onload=ev=>{
+    if(fromOverlay) closeOverlay();
+    saveReqPhoto(ev.target.result, ext);
+    triggerFlash();
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+}
+
+function handleExtraCapture(e){
+  const f=e.target.files[0]; if(!f) return;
+  const ext=f.type==='image/png'?'png':'jpg';
+  const r=new FileReader();
+  r.onload=ev=>{
+    const idx=extraPhotos.length+1;
+    extraPhotos.push({dataUrl:ev.target.result, ext, timestamp:new Date().toISOString(), name:`Extra ${idx}`});
+    renderExtraChecklist(); updateProgress(); updateBars();
+    triggerFlash();
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+}
+
+function saveReqPhoto(dataUrl, ext){
+  reqPhotos[curPhoto]={dataUrl, ext, timestamp:new Date().toISOString()};
+  // advance to next uncaptured
+  let next=curPhoto;
+  for(let j=0;j<reqPhotos.length;j++) if(!reqPhotos[j]){next=j;break;}
+  curPhoto=next;
+  renderChecklist(); updateSampleUI(); updateProgress(); updateBars();
+}
+
+function triggerFlash(){
+  const f=document.getElementById('flash');
+  f.classList.add('go'); setTimeout(()=>f.classList.remove('go'),200);
+}
+
+// ══════════════════════════════════════════════════════
+//  SAMPLE OVERLAY
+// ══════════════════════════════════════════════════════
+function openOverlay(){
+  updateSampleUI();
+  document.getElementById('sampOverlay').classList.add('open');
+}
+function closeOverlay(){ document.getElementById('sampOverlay').classList.remove('open'); }
+
+// ══════════════════════════════════════════════════════
+//  SAVE CYCLE → ZIP
+// ══════════════════════════════════════════════════════
+async function saveCycle(){
+  const sn=document.getElementById('snInput').value.trim();
+  if(!sn){ document.getElementById('snInput').classList.add('err'); document.getElementById('snInput').focus(); showToast('Inserisci Serial Number!'); return; }
+  if(reqPhotos.some(p=>p===null)){ showToast('Foto obbligatorie mancanti!'); return; }
+
+  showScreen('scrSaving');
+  const prod   = cfg[curProd];
+  const folder = `${prod.label.replace(/ /g,'_')}_${sn}`;
+
+  document.getElementById('savingMsg').textContent='Generazione PDF…';
+  const pdfBytes = await buildPDF(prod, sn);
+
+  document.getElementById('savingMsg').textContent='Creazione ZIP…';
+  const zip = new JSZip();
+  const dir = zip.folder(folder);
+  dir.file(`${folder}_report.pdf`, pdfBytes);
+
+  reqPhotos.forEach((ph,j)=>{
+    const name=`${String(j+1).padStart(2,'0')}_${prod.photos[j].name.replace(/[^\w]/g,'_')}.${ph.ext}`;
+    dir.file(name, ph.dataUrl.split(',')[1], {base64:true});
+  });
+  extraPhotos.forEach((ph,j)=>{
+    const name=`extra_${String(j+1).padStart(2,'0')}.${ph.ext}`;
+    dir.file(name, ph.dataUrl.split(',')[1], {base64:true});
+  });
+
+  const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`${folder}.zip`; a.click();
+  URL.revokeObjectURL(url);
+
+  history.push({prodIdx:curProd, prodLabel:prod.label, pn:prod.pn, sn, reqCount:reqPhotos.length, extraCount:extraPhotos.length, zipBlob:blob, folder});
+  showLabelScreen(prod, sn);
+}
+
+async function redownload(idx){
+  const h=history[idx];
+  const url=URL.createObjectURL(h.zipBlob);
+  const a=document.createElement('a'); a.href=url; a.download=`${h.folder}.zip`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════════
+//  PDF BUILDER
+// ══════════════════════════════════════════════════════
+async function buildPDF(prod, sn){
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297,M=14;
+
+  // Cover
+  pdf.setFillColor(15,15,17); pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(0,212,255); pdf.rect(0,0,6,H,'F');
+  pdf.setTextColor(0,212,255); pdf.setFont('helvetica','bold'); pdf.setFontSize(26);
+  pdf.text('REPORT ISPEZIONE',M+4,38);
+  pdf.text('SPEDIZIONE',M+4,50);
+  pdf.setFontSize(10); pdf.setTextColor(107,107,128); pdf.setFont('helvetica','normal');
+  pdf.text('Controllo fotografico qualità prodotto',M+4,60);
+  pdf.setDrawColor(46,46,56); pdf.line(M+4,68,W-M,68);
+
+  const info=[
+    ['OPERATORE',session.operator],['DATA',session.date],
+    ['PRODOTTO',prod.label],['PART NUMBER',prod.pn],['SERIAL NUMBER',sn],
+    ['FOTO OBBLIGATORIE',String(reqPhotos.length)],
+    ['FOTO ADDIZIONALI',String(extraPhotos.length)],
+  ];
+  let y=80;
+  info.forEach(([k,v])=>{
+    pdf.setFontSize(8); pdf.setTextColor(107,107,128); pdf.setFont('helvetica','bold'); pdf.text(k,M+4,y);
+    pdf.setFontSize(12); pdf.setTextColor(232,232,240); pdf.setFont('helvetica','normal'); pdf.text(v,M+4,y+6);
+    y+=17;
+  });
+  pdf.setFontSize(8); pdf.setTextColor(107,107,128);
+  pdf.text(`Generato il ${new Date().toLocaleString('it-IT')}`,M+4,H-10);
+
+  // Required photos
+  const allPhotos=[
+    ...reqPhotos.map((ph,j)=>({ph,name:prod.photos[j].name,extra:false})),
+    ...extraPhotos.map((ph,j)=>({ph,name:ph.name,extra:true}))
+  ];
+
+  pdf.addPage();
+  pdf.setFillColor(15,15,17); pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(0,212,255); pdf.rect(0,0,6,H,'F');
+  pdf.setFontSize(10); pdf.setTextColor(107,107,128); pdf.setFont('helvetica','normal');
+  pdf.text(`${prod.label}  /  PN: ${prod.pn}  /  SN: ${sn}`,M+4,16);
+  pdf.setDrawColor(46,46,56); pdf.line(M+4,22,W-M,22);
+
+  const COLS=2,imgW=(W-2*M-4-8)/COLS,imgH=imgW*.7;
+  let pageY=28,col=0;
+  for(const {ph,name,extra} of allPhotos){
+    if(pageY+imgH+14>H-10){
+      pdf.addPage();
+      pdf.setFillColor(15,15,17); pdf.rect(0,0,W,H,'F');
+      pdf.setFillColor(0,212,255); pdf.rect(0,0,6,H,'F');
+      pageY=18; col=0;
+    }
+    const x=M+4+col*(imgW+8);
+    pdf.setFontSize(7);
+    pdf.setTextColor(extra?124:107, extra?58:107, extra?237:128);
+    pdf.setFont('helvetica','bold');
+    pdf.text((extra?'[EXTRA] ':'')+name.toUpperCase(),x,pageY-1);
+    pdf.setDrawColor(46,46,56); pdf.setFillColor(26,26,31);
+    pdf.roundedRect(x,pageY,imgW,imgH,2,2,'FD');
+    if(ph){
+      try{pdf.addImage(ph.dataUrl,'JPEG',x,pageY,imgW,imgH,'','MEDIUM');}catch(e){}
+      pdf.setFontSize(6); pdf.setTextColor(107,107,128);
+      pdf.text(new Date(ph.timestamp).toLocaleString('it-IT'),x,pageY+imgH+4);
+    }
+    col++; if(col>=COLS){col=0;pageY+=imgH+16;}
+  }
+
+  return pdf.output('arraybuffer');
+}
+
+// ══════════════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════════════
+let adminCfg = [];   // working copy while in admin
+
+// Cambia questa password come vuoi
+const ADMIN_PASSWORD = 'AlessandrIA';
+
+function goAdmin(){
+  document.getElementById('pswInput').value='';
+  document.getElementById('pswError').classList.remove('show');
+  document.getElementById('pswOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('pswInput').focus(),100);
+}
+
+function checkAdminPsw(){
+  const val = document.getElementById('pswInput').value;
+  if(val === ADMIN_PASSWORD){
+    closePswModal();
+    adminCfg = JSON.parse(JSON.stringify(cfg));
+    renderAdmin();
+    showScreen('scrAdmin');
+  } else {
+    document.getElementById('pswError').classList.add('show');
+    document.getElementById('pswInput').value='';
+    document.getElementById('pswInput').focus();
+  }
+}
+
+function closePswModal(){
+  document.getElementById('pswOverlay').classList.remove('open');
+}
+
+function togglePswEye(){
+  const inp = document.getElementById('pswInput');
+  const eye = document.getElementById('pswEye');
+  if(inp.type==='password'){ inp.type='text'; eye.textContent='🙈'; }
+  else { inp.type='password'; eye.textContent='👁️'; }
+}
+
+function renderAdmin(){
+  const wrap=document.getElementById('adminProdList');
+  wrap.innerHTML='';
+  adminCfg.forEach((p,pi)=>{
+    const card=document.createElement('div');
+    card.className='prod-admin-card';
+
+    // header
+    const head=document.createElement('div');
+    head.className='prod-admin-header';
+    head.innerHTML=`
+      <div>
+        <div class="prod-admin-title">${p.label}</div>
+        <div class="prod-admin-subtitle">${p.pn} · ${p.photos.length} foto</div>
+      </div>
+      <span class="prod-admin-chevron" id="chev-${pi}">▼</span>
+    `;
+    head.onclick=()=>toggleAdminPanel(pi);
+
+    // body
+    const body=document.createElement('div');
+    body.className='prod-admin-body';
+    body.id=`admin-body-${pi}`;
+
+    // product name & PN editable
+    body.innerHTML=`
+      <div class="form-group">
+        <label class="flabel">Nome Prodotto</label>
+        <input type="text" value="${p.label}" oninput="adminCfg[${pi}].label=this.value;updateAdminHeader(${pi})">
+      </div>
+      <div class="form-group">
+        <label class="flabel">Part Number</label>
+        <input type="text" value="${p.pn}" oninput="adminCfg[${pi}].pn=this.value;updateAdminHeader(${pi})">
+      </div>
+      <div class="photo-count-row">
+        <label>Numero di foto richieste</label>
+        <input class="count-input" type="number" min="1" max="20" value="${p.photos.length}"
+          onchange="resizePhotoList(${pi},parseInt(this.value)||1)">
+      </div>
+      <div class="divider"></div>
+      <div class="section-title" style="margin-top:0">Mapping Datamatrix (separatore: ;)</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Indica la posizione (1 = primo campo) del PN e dell'SN nel testo del datamatrix di questo prodotto.</p>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div style="flex:1">
+          <label class="flabel">Posizione PN</label>
+          <input class="count-input" type="number" min="1" max="20" style="width:100%" value="${p.dmxPN||1}"
+            onchange="adminCfg[${pi}].dmxPN=parseInt(this.value)||1">
+        </div>
+        <div style="flex:1">
+          <label class="flabel">Posizione SN</label>
+          <input class="count-input" type="number" min="1" max="20" style="width:100%" value="${p.dmxSN||2}"
+            onchange="adminCfg[${pi}].dmxSN=parseInt(this.value)||2">
+        </div>
+      </div>
+      <div class="section-title" style="margin-top:0">Nomi e foto campione</div>
+      <div id="admin-photos-${pi}"></div>
+    `;
+
+    card.appendChild(head);
+    card.appendChild(body);
+    wrap.appendChild(card);
+    renderAdminPhotos(pi);
+  });
+}
+
+function toggleAdminPanel(pi){
+  const body=document.getElementById(`admin-body-${pi}`);
+  const chev=document.getElementById(`chev-${pi}`);
+  const open=body.classList.toggle('open');
+  chev.textContent=open?'▲':'▼';
+}
+
+function updateAdminHeader(pi){
+  const p=adminCfg[pi];
+  const head=document.querySelector(`#adminProdList .prod-admin-card:nth-child(${pi+1}) .prod-admin-subtitle`);
+  if(head) head.textContent=`${p.pn} · ${p.photos.length} foto`;
+  const title=document.querySelector(`#adminProdList .prod-admin-card:nth-child(${pi+1}) .prod-admin-title`);
+  if(title) title.textContent=p.label;
+}
+
+function resizePhotoList(pi, count){
+  const cur=adminCfg[pi].photos;
+  if(count>cur.length){
+    for(let k=cur.length;k<count;k++) cur.push({name:`Foto ${k+1}`,sample:null});
+  } else {
+    adminCfg[pi].photos=cur.slice(0,count);
+  }
+  renderAdminPhotos(pi);
+  updateAdminHeader(pi);
+}
+
+function renderAdminPhotos(pi){
+  const wrap=document.getElementById(`admin-photos-${pi}`);
+  if(!wrap) return;
+  wrap.innerHTML='';
+  adminCfg[pi].photos.forEach((ph,j)=>{
+    const row=document.createElement('div');
+    row.className='photo-name-row';
+
+    // number badge
+    const num=document.createElement('span');
+    num.style.cssText='font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0;width:18px;text-align:right';
+    num.textContent=j+1;
+
+    // sample label
+    const lbl=document.createElement('label');
+    lbl.className='samp-lbl';
+    lbl.title='Carica foto campione';
+    lbl.innerHTML=ph.sample?`<img src="${ph.sample}">`:'🖼️';
+    const inp=document.createElement('input');
+    inp.type='file'; inp.accept='image/*';
+    inp.onchange=e=>{
+      const f=e.target.files[0]; if(!f) return;
+      const r=new FileReader();
+      r.onload=ev=>{adminCfg[pi].photos[j].sample=ev.target.result;renderAdminPhotos(pi);};
+      r.readAsDataURL(f);
+    };
+    lbl.appendChild(inp);
+
+    // name input
+    const ni=document.createElement('input');
+    ni.type='text'; ni.value=ph.name; ni.placeholder=`Foto ${j+1}`;
+    ni.oninput=()=>adminCfg[pi].photos[j].name=ni.value;
+
+    // clear sample btn
+    if(ph.sample){
+      const clr=document.createElement('button');
+      clr.className='del-cfg'; clr.textContent='🗑️'; clr.title='Rimuovi campione';
+      clr.onclick=()=>{adminCfg[pi].photos[j].sample=null;renderAdminPhotos(pi);};
+      row.appendChild(num); row.appendChild(lbl); row.appendChild(ni); row.appendChild(clr);
+    } else {
+      row.appendChild(num); row.appendChild(lbl); row.appendChild(ni);
+    }
+    wrap.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  EXPORT / IMPORT CONFIG
+// ══════════════════════════════════════════════════════
+function exportConfig(){
+  // Export current SAVED config (not adminCfg draft)
+  const data = {
+    version:   1,
+    exported:  new Date().toISOString(),
+    config:    cfg
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `ship-inspector-config-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ Configurazione esportata');
+}
+
+function importConfig(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(!data.config || !Array.isArray(data.config)) throw new Error('Formato non valido');
+      if(!confirm(`Importare la configurazione del ${data.exported?.split('T')[0]||'file'}?
+Sostituirà la configurazione attuale.`)) return;
+      cfg = data.config;
+      saveConfigToStorage();
+      adminCfg = JSON.parse(JSON.stringify(cfg));
+      renderAdmin();
+      showToast('✓ Configurazione importata');
+    } catch(err){
+      showToast('⚠️ File non valido');
+    }
+  };
+  r.readAsText(f);
+  e.target.value='';
+}
+
+function saveAdminConfig(){
+  cfg=JSON.parse(JSON.stringify(adminCfg));
+  saveConfigToStorage();
+  showToast('✓ Configurazione salvata!');
+  setTimeout(()=>goProducts(),800);
+}
+
+// ══════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+//  DMX INPUT (Scandit / copia-incolla)
+// ══════════════════════════════════════════════════════
+let dmxMatchedProd = -1;
+let dmxMatchedSN   = '';
+
+async function pasteDmx(){
+  try {
+    const text = await navigator.clipboard.readText();
+    if(!text){ showToast('Appunti vuoti'); return; }
+    const inp = document.getElementById('dmxInput');
+    inp.value = text;
+    onDmxInput(text);
+  } catch(e){
+    // Fallback: focus field and let user paste manually
+    const inp = document.getElementById('dmxInput');
+    inp.focus();
+    showToast('Tocca e tieni premuto → Incolla');
+  }
+}
+
+function onDmxInput(val){
+  // Reset banners
+  document.getElementById('dmxMatchBanner').style.display   = 'none';
+  document.getElementById('dmxNoMatchBanner').style.display = 'none';
+  dmxMatchedProd = -1;
+  dmxMatchedSN   = '';
+
+  const text = val.trim();
+  if(!text) return;
+
+  // Debounce: process after user stops typing for 300ms
+  clearTimeout(window._dmxTimer);
+  window._dmxTimer = setTimeout(()=> processDmxText(text), 300);
+}
+
+function processDmxText(text){
+  const fields = text.split(';').map(f=>f.trim());
+  let matched = -1, extractedPN='', extractedSN='';
+
+  for(let i=0;i<cfg.length;i++){
+    const p     = cfg[i];
+    const pnPos = (p.dmxPN||1)-1;
+    const snPos = (p.dmxSN||2)-1;
+    const dmxPN = fields[pnPos]||'';
+    if(dmxPN && (dmxPN===p.pn || dmxPN.includes(p.pn) || p.pn.includes(dmxPN))){
+      matched     = i;
+      extractedPN = dmxPN;
+      extractedSN = fields[snPos]||'';
+      break;
+    }
+  }
+
+  if(matched >= 0){
+    dmxMatchedProd = matched;
+    dmxMatchedSN   = extractedSN;
+    const p = cfg[matched];
+    document.getElementById('dmxMatchName').textContent    = p.label;
+    document.getElementById('dmxMatchDetails').textContent = `PN: ${extractedPN}  ·  SN: ${extractedSN||'—'}`;
+    document.getElementById('dmxMatchBanner').style.display   = '';
+    document.getElementById('dmxNoMatchBanner').style.display = 'none';
+  } else {
+    document.getElementById('dmxMatchBanner').style.display   = 'none';
+    document.getElementById('dmxNoMatchBanner').style.display = '';
+    document.getElementById('dmxRawFields').textContent =
+      fields.map((f,i)=>`[${i+1}] ${f}`).join('  ·  ');
+  }
+}
+
+function confirmDmxMatch(){
+  if(dmxMatchedProd < 0) return;
+  const idx = dmxMatchedProd;
+  const sn  = dmxMatchedSN;
+  // Reset field
+  document.getElementById('dmxInput').value='';
+  document.getElementById('dmxMatchBanner').style.display='none';
+  dmxMatchedProd=-1; dmxMatchedSN='';
+  // Go to shoot
+  selectProduct(idx);
+  if(sn){
+    const snEl=document.getElementById('snInput');
+    if(snEl){ snEl.value=sn; onSNChange(); }
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  DATAMATRIX SCANNER
+// ══════════════════════════════════════════════════════
+let scanStream  = null;
+let scanAnimId  = null;
+let scannedPN   = '';
+let scannedSN   = '';
+let scanCanvas  = null;
+let scanCtx     = null;
+let scanDetector= null;
+
+async function openScanner(){
+  document.getElementById('scanOverlay').classList.add('open');
+  document.getElementById('scanResultOverlay').classList.remove('show');
+  document.getElementById('scanErrMsg').style.display='none';
+
+  // Prepare off-screen canvas for frame capture
+  if(!scanCanvas){ scanCanvas=document.createElement('canvas'); scanCtx=scanCanvas.getContext('2d'); }
+
+  // Check BarcodeDetector support
+  if(!('BarcodeDetector' in window)){
+    // Fallback: show manual input
+    showScanFallback();
+    return;
+  }
+  try {
+    scanDetector = new BarcodeDetector({
+      formats:['data_matrix','qr_code','code_128','code_39','aztec','pdf417']
+    });
+  } catch(e){
+    showScanFallback(); return;
+  }
+
+  await startScanCamera();
+}
+
+async function startScanCamera(){
+  try {
+    // Stop any existing stream first
+    stopScanCamera();
+
+    scanStream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720} }
+    });
+    const video = document.getElementById('scanVideo');
+    video.srcObject = scanStream;
+    video.onloadedmetadata = () => {
+      video.play();
+      scanCanvas.width  = video.videoWidth  || 1280;
+      scanCanvas.height = video.videoHeight || 720;
+      scheduleScanFrame(video);
+    };
+  } catch(e){
+    console.error('Camera error:', e);
+    showScanFallback();
+  }
+}
+
+function scheduleScanFrame(video){
+  scanAnimId = requestAnimationFrame(async ()=>{
+    if(!scanStream) return;
+    if(video.readyState === video.HAVE_ENOUGH_DATA){
+      scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
+      try {
+        const barcodes = await scanDetector.detect(scanCanvas);
+        if(barcodes && barcodes.length > 0){
+          stopScanCamera();
+          processScanResult(barcodes[0].rawValue);
+          return;
+        }
+      } catch(e){}
+    }
+    scheduleScanFrame(video);
+  });
+}
+
+function stopScanCamera(){
+  if(scanAnimId){ cancelAnimationFrame(scanAnimId); scanAnimId=null; }
+  if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
+}
+
+function closeScanner(){
+  stopScanCamera();
+  hideScanFallback();
+  document.getElementById('scanOverlay').classList.remove('open');
+}
+
+function retryScanner(){
+  document.getElementById('scanResultOverlay').classList.remove('show');
+  hideScanFallback();
+  startScanCamera();
+}
+
+// ── Fallback: manual text input when BarcodeDetector not available ──
+function showScanFallback(){
+  stopScanCamera();
+  const vw = document.getElementById('scanVideo');
+  vw.style.display='none';
+  // Inject fallback UI into scan-hint
+  const hint = document.querySelector('.scan-hint');
+  if(hint) hint.style.display='none';
+  const finder = document.querySelector('.scan-finder');
+  if(finder) finder.style.display='none';
+
+  let fb = document.getElementById('scanFallback');
+  if(!fb){
+    fb = document.createElement('div');
+    fb.id='scanFallback';
+    fb.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;background:var(--bg)';
+    fb.innerHTML=`
+      <div style="font-size:40px">⌨️</div>
+      <p style="color:var(--muted);font-size:13px;text-align:center">La fotocamera di scansione non è supportata su questo browser.<br>Incolla o digita il testo del datamatrix:</p>
+      <textarea id="scanFallbackText" style="width:100%;max-width:400px;height:100px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:var(--mono);font-size:13px;resize:none" placeholder="Testo datamatrix (campi separati da ;)"></textarea>
+      <button onclick="processScanFallback()" style="width:100%;max-width:400px;height:48px;background:linear-gradient(135deg,var(--accent),#0099bb);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer">Elabora →</button>
+    `;
+    document.querySelector('.scan-video-wrap').appendChild(fb);
+  }
+  fb.style.display='flex';
+}
+
+function hideScanFallback(){
+  const fb=document.getElementById('scanFallback');
+  if(fb) fb.style.display='none';
+  const vw=document.getElementById('scanVideo');
+  if(vw) vw.style.display='';
+  const hint=document.querySelector('.scan-hint');
+  if(hint) hint.style.display='';
+  const finder=document.querySelector('.scan-finder');
+  if(finder) finder.style.display='';
+}
+
+function processScanFallback(){
+  const text=(document.getElementById('scanFallbackText')?.value||'').trim();
+  if(!text){ showToast('Inserisci il testo del datamatrix'); return; }
+  processScanResult(text);
+}
+
+function processScanResult(text){
+  // Split by ; and trim each field
+  const fields = text.split(';').map(f=>f.trim());
+
+  // Try to match against each product's dmxPN position
+  let matchedProd = -1;
+  let extractedPN = '';
+  let extractedSN = '';
+
+  for(let i=0;i<cfg.length;i++){
+    const p    = cfg[i];
+    const pnPos = (p.dmxPN||1) - 1;  // 0-indexed
+    const snPos = (p.dmxSN||2) - 1;
+
+    const dmxPN = fields[pnPos] || '';
+    // Match: the PN in the datamatrix contains or equals the configured PN
+    if(dmxPN && (dmxPN.includes(p.pn) || p.pn.includes(dmxPN) || dmxPN===p.pn)){
+      matchedProd  = i;
+      extractedPN  = dmxPN;
+      extractedSN  = fields[snPos] || '';
+      break;
+    }
+  }
+
+  scannedPN = extractedPN;
+  scannedSN = extractedSN;
+
+  // Show result panel
+  const res = document.getElementById('scanResultOverlay');
+  const box = document.getElementById('scanResultFields');
+  const err = document.getElementById('scanErrMsg');
+  const btn = document.getElementById('scanConfirmBtn');
+  res.classList.add('show');
+
+  if(matchedProd >= 0){
+    const p = cfg[matchedProd];
+    err.style.display='none';
+    box.innerHTML = `
+      <div class="scan-field"><div class="scan-field-lbl">Prodotto rilevato</div><div class="scan-field-val">${p.label}</div></div>
+      <div class="scan-field"><div class="scan-field-lbl">Part Number</div><div class="scan-field-val">${extractedPN}</div></div>
+      <div class="scan-field"><div class="scan-field-lbl">Serial Number</div><div class="scan-field-val">${extractedSN||'—'}</div></div>
+      <div class="scan-field"><div class="scan-field-lbl">Testo completo</div><div class="scan-field-val" style="font-size:10px;word-break:break-all;color:var(--muted)">${text}</div></div>
+    `;
+    btn.style.display='';
+    btn.dataset.prodIdx = matchedProd;
+  } else {
+    // No match — show raw data and let user decide
+    err.style.display='';
+    err.textContent = '⚠️ Nessun prodotto trovato per questo codice. Verifica il mapping in Admin.';
+    box.innerHTML = `
+      <div class="scan-field"><div class="scan-field-lbl">Testo letto</div><div class="scan-field-val" style="font-size:11px;word-break:break-all">${text}</div></div>
+      <div class="scan-field"><div class="scan-field-lbl">Campi (separati da ;)</div><div class="scan-field-val" style="font-size:11px">${fields.map((f,i)=>`[${i+1}] ${f}`).join(' · ')}</div></div>
+    `;
+    btn.style.display='none';
+  }
+}
+
+function confirmScan(){
+  const btn      = document.getElementById('scanConfirmBtn');
+  const prodIdx  = parseInt(btn.dataset.prodIdx);
+  closeScanner();
+  selectProduct(prodIdx);
+  // Pre-fill SN
+  if(scannedSN){
+    const snEl = document.getElementById('snInput');
+    if(snEl){ snEl.value = scannedSN; onSNChange(); }
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  LABEL + QR + ZPL
+// ══════════════════════════════════════════════════════
+let lastLabelData = {};
+
+function showLabelScreen(prod, sn){
+  lastLabelData = {
+    prod, sn,
+    operator: session.operator,
+    date:     session.date,
+    ts:       new Date().toISOString(),
+    photos:   reqPhotos.length,
+    extra:    extraPhotos.length
+  };
+
+  // Build QR content — compact JSON
+  const qrContent = JSON.stringify({
+    sn,
+    pn:   prod.pn,
+    prod: prod.label,
+    op:   session.operator,
+    dt:   session.date,
+    ok:   true
+  });
+
+  // Render QR
+  const qrBox = document.getElementById('qrBox');
+  qrBox.innerHTML = '';
+  new QRCode(qrBox, {
+    text:          qrContent,
+    width:         180,
+    height:        180,
+    colorDark:     '#000000',
+    colorLight:    '#ffffff',
+    correctLevel:  QRCode.CorrectLevel.M
+  });
+
+  // Render data table
+  const rows = [
+    ['Prodotto',  prod.label],
+    ['Part N.',   prod.pn],
+    ['Serial N.', sn],
+    ['Operatore', session.operator],
+    ['Data',      session.date],
+    ['Foto',      `${reqPhotos.length} + ${extraPhotos.length} extra`],
+    ['Esito',     '✓ ISPEZIONATO'],
+  ];
+  document.getElementById('labelData').innerHTML = rows.map(([k,v])=>
+    `<div class="label-row"><span class="label-key">${k}</span><span class="label-val">${v}</span></div>`
+  ).join('');
+
+  showScreen('scrLabel');
+}
+
+function buildZPL(){
+  const d = lastLabelData;
+  const {prod, sn, operator, date, photos, extra} = d;
+
+  // QR data for ZPL
+  const qrData = `SN:${sn}|PN:${prod.pn}|PROD:${prod.label}|OP:${operator}|DT:${date}|OK:1`;
+
+  // ZPL for 100x60mm label (standard Zebra shipping label)
+  const zpl = `^XA
+^CF0,28
+^FO20,15^FDShip Inspector^FS
+^CF0,20
+^FO20,48^FD${prod.label}^FS
+^FO20,72^FDPN: ${prod.pn}^FS
+^CF0,24
+^FO20,100^FDSN: ${sn}^FS
+^CF0,18
+^FO20,132^FDOp: ${operator}  Data: ${date}^FS
+^FO20,152^FDFoto: ${photos} + ${extra} extra  ISPEZIONATO^FS
+^FO20,170^GB560,3,3^FS
+^BQN,2,6
+^FO360,15^FDLA,${qrData}^FS
+^XZ`;
+
+  return zpl;
+}
+
+function downloadZPL(){
+  const d  = lastLabelData;
+  const fn = `etichetta_${d.prod.label.replace(/ /g,'_')}_${d.sn}.zpl`;
+  const blob = new Blob([buildZPL()], {type:'text/plain'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=fn; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function printLabelBrowser(){
+  const d = lastLabelData;
+  const rows = [
+    ['Prodotto',  d.prod.label],
+    ['Part N.',   d.prod.pn],
+    ['Serial N.', d.sn],
+    ['Operatore', d.operator],
+    ['Data',      d.date],
+    ['Foto',      `${d.photos} + ${d.extra} extra`],
+    ['Esito',     'ISPEZIONATO ✓'],
+  ];
+  const qrImg = document.querySelector('#qrBox img')?.src || '';
+  const win = window.open('','_blank','width=400,height=320');
+  win.document.write(`<!DOCTYPE html><html><head><title>Etichetta</title>
+  <style>
+    body{font-family:monospace;margin:10px;font-size:11px}
+    h2{font-size:14px;margin:0 0 6px}
+    table{width:100%;border-collapse:collapse}
+    td{padding:2px 4px;border-bottom:1px solid #ddd}
+    td:first-child{color:#666;width:70px}
+    td:last-child{font-weight:bold}
+    img{float:right;width:80px;height:80px;margin-left:8px}
+    .ok{color:green;font-size:13px;font-weight:bold;margin-top:6px}
+    @media print{@page{size:100mm 60mm;margin:4mm}}
+  </style></head><body onload="window.print()">
+  ${qrImg?`<img src="${qrImg}">`:''}
+  <h2>Ship Inspector</h2>
+  <table>${rows.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
+  <div class="ok">✓ ISPEZIONATO</div>
+  </body></html>`);
+  win.document.close();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3500);
+}
+</script>
+</body>
+</html>
