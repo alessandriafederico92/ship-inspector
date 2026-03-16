@@ -1,6 +1,5 @@
 {
-  "version": 1,
-  "exported": "2026-03-16T10:05:11.280Z",
+  "lastModified": 1773673805628,
   "config": [
     {
       "label": "Motore P25",
@@ -10,64 +9,40 @@
       "dmxSep": "/",
       "photos": [
         {
-          "name": "Etichetta motore",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta motore"
         },
         {
-          "name": "Etichetta tensione",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta tensione"
         },
         {
-          "name": "Etichetta sicurezza",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta sicurezza"
         },
         {
-          "name": "Presenza tappi circuito acqua",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Presenza tappi circuito acqua"
         },
         {
-          "name": "Presenza valvola sfiato",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Presenza valvola sfiato"
         },
         {
-          "name": "Presenza  tappo connettore LV",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Presenza  tappo connettore LV"
         },
         {
-          "name": "Presenza oring",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Presenza oring"
         },
         {
-          "name": "Albero e punto blu",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Albero e punto blu"
         },
         {
-          "name": "Etichetta cavo",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta cavo"
         },
         {
-          "name": "Connettore",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Connettore"
         },
         {
-          "name": "Protezione connettore",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Protezione connettore"
         },
         {
-          "name": "Bollino",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Bollino"
         }
       ]
     },
@@ -79,44 +54,28 @@
       "dmxSep": "/",
       "photos": [
         {
-          "name": "Etichetta",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta"
         },
         {
-          "name": "Vista alto",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Vista alto"
         },
         {
-          "name": "Interlock AC",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Interlock AC"
         },
         {
-          "name": "Lato AC",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Lato AC"
         },
         {
-          "name": "Interlock DC",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Interlock DC"
         },
         {
-          "name": "Lato DC",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Lato DC"
         },
         {
-          "name": "Posteriore",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Posteriore"
         },
         {
-          "name": "Bollino",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Bollino"
         }
       ]
     },
@@ -128,89 +87,55 @@
       "dmxSep": "/",
       "photos": [
         {
-          "name": "Etichetta",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta"
         },
         {
-          "name": "Filetti circuito acqua dx",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Filetti circuito acqua dx"
         },
         {
-          "name": "Filetti circuito acqua sx",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Filetti circuito acqua sx"
         },
         {
-          "name": "Schedina segnali dx",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Schedina segnali dx"
         },
         {
-          "name": "Busbar dx fronte",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Busbar dx fronte"
         },
         {
-          "name": "Busbar dx retro",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Busbar dx retro"
         },
         {
-          "name": "Schedina segnali sx",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Schedina segnali sx"
         },
         {
-          "name": "Busbar sx fronte",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Busbar sx fronte"
         },
         {
-          "name": "Busbar sx retro",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Busbar sx retro"
         },
         {
-          "name": "Pin interlock",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Pin interlock"
         },
         {
-          "name": "Dall'alto",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Dall'alto"
         },
         {
-          "name": "Tappi fase",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Tappi fase"
         },
         {
-          "name": "Cover LV",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Cover LV"
         },
         {
-          "name": "Coperchio",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Coperchio"
         },
         {
-          "name": "Lato fasi UV",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Lato fasi UV"
         },
         {
-          "name": "Lato opposto UV",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Lato opposto UV"
         },
         {
-          "name": "Bollino",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Bollino"
         }
       ]
     },
@@ -222,69 +147,43 @@
       "dmxSep": "/",
       "photos": [
         {
-          "name": "Etichetta",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta"
         },
         {
-          "name": "Qr scatola",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Qr scatola"
         },
         {
-          "name": "Posteriore scatola completa",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Posteriore scatola completa"
         },
         {
-          "name": "Dettaglio 1 pin",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Dettaglio 1 pin"
         },
         {
-          "name": "Dettaglio 2 pin",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Dettaglio 2 pin"
         },
         {
-          "name": "Albero",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Albero"
         },
         {
-          "name": "Cavi LV e temperatura ",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Cavi LV e temperatura "
         },
         {
-          "name": "Cavi posizionati",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Cavi posizionati"
         },
         {
-          "name": "Coperchio superiore",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Coperchio superiore"
         },
         {
-          "name": "Allineamento busbars",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Allineamento busbars"
         },
         {
-          "name": "Sachetto accessori",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Sachetto accessori"
         },
         {
-          "name": "Bollino",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Bollino"
         },
         {
-          "name": "Sacco VCI",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Sacco VCI"
         }
       ]
     },
@@ -296,69 +195,43 @@
       "dmxSep": "/",
       "photos": [
         {
-          "name": "Etichetta",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Etichetta"
         },
         {
-          "name": "QR scatola",
-          "sample": null,
-          "sampleUrl": null
+          "name": "QR scatola"
         },
         {
-          "name": "Posteriore scatola completa",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Posteriore scatola completa"
         },
         {
-          "name": "Dettaglio pin 1",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Dettaglio pin 1"
         },
         {
-          "name": "Dettaglio pin 2",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Dettaglio pin 2"
         },
         {
-          "name": "Albero",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Albero"
         },
         {
-          "name": "Cavi Lv e temperatura ",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Cavi Lv e temperatura "
         },
         {
-          "name": "Cavi posizionati",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Cavi posizionati"
         },
         {
-          "name": "Coperchio superiore",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Coperchio superiore"
         },
         {
-          "name": "Allineamento busbars",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Allineamento busbars"
         },
         {
-          "name": "Sacchetto accessori ",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Sacchetto accessori "
         },
         {
-          "name": "Bollino",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Bollino"
         },
         {
-          "name": "Sacchetto VCI",
-          "sample": null,
-          "sampleUrl": null
+          "name": "Sacchetto VCI"
         }
       ]
     }
