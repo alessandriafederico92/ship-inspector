@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "exported": "2026-03-16T10:05:11.280Z",
+  "config": [
+    {
+      "label": "Motore P25",
+      "pn": "SY9Y-15790-AB",
+      "dmxPN": 1,
+      "dmxSN": 2,
+      "dmxSep": "/",
+      "photos": [
+        {
+          "name": "Etichetta motore",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Etichetta tensione",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Etichetta sicurezza",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Presenza tappi circuito acqua",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Presenza valvola sfiato",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Presenza  tappo connettore LV",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Presenza oring",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Albero e punto blu",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Etichetta cavo",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Connettore",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Protezione connettore",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Bollino",
+          "sample": null,
+          "sampleUrl": null
+        }
+      ]
+    },
+    {
+      "label": "Inverter p25",
+      "pn": "SY9Y-14B298-AG",
+      "dmxPN": 1,
+      "dmxSN": 2,
+      "dmxSep": "/",
+      "photos": [
+        {
+          "name": "Etichetta",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Vista alto",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Interlock AC",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Lato AC",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Interlock DC",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Lato DC",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Posteriore",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Bollino",
+          "sample": null,
+          "sampleUrl": null
+        }
+      ]
+    },
+    {
+      "label": "Inverter P4",
+      "pn": "SY9Y-6A961-AK",
+      "dmxPN": 1,
+      "dmxSN": 2,
+      "dmxSep": "/",
+      "photos": [
+        {
+          "name": "Etichetta",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Filetti circuito acqua dx",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Filetti circuito acqua sx",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Schedina segnali dx",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Busbar dx fronte",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Busbar dx retro",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Schedina segnali sx",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Busbar sx fronte",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Busbar sx retro",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Pin interlock",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Dall'alto",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Tappi fase",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Cover LV",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Coperchio",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Lato fasi UV",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Lato opposto UV",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Bollino",
+          "sample": null,
+          "sampleUrl": null
+        }
+      ]
+    },
+    {
+      "label": "Motore P4 sx",
+      "pn": "SY9Y-6A999-AE",
+      "dmxPN": 1,
+      "dmxSN": 3,
+      "dmxSep": "/",
+      "photos": [
+        {
+          "name": "Etichetta",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Qr scatola",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Posteriore scatola completa",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Dettaglio 1 pin",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Dettaglio 2 pin",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Albero",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Cavi LV e temperatura ",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Cavi posizionati",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Coperchio superiore",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Allineamento busbars",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Sachetto accessori",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Bollino",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Sacco VCI",
+          "sample": null,
+          "sampleUrl": null
+        }
+      ]
+    },
+    {
+      "label": "Motore P4 Dx",
+      "pn": "SY9Y-6A998-AE",
+      "dmxPN": 1,
+      "dmxSN": 3,
+      "dmxSep": "/",
+      "photos": [
+        {
+          "name": "Etichetta",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "QR scatola",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Posteriore scatola completa",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Dettaglio pin 1",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Dettaglio pin 2",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Albero",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Cavi Lv e temperatura ",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Cavi posizionati",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Coperchio superiore",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Allineamento busbars",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Sacchetto accessori ",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Bollino",
+          "sample": null,
+          "sampleUrl": null
+        },
+        {
+          "name": "Sacchetto VCI",
+          "sample": null,
+          "sampleUrl": null
+        }
+      ]
+    }
+  ]
+}
