@@ -1,5 +1,5 @@
 {
-  "lastModified": 1773673805628,
+  "lastModified": 1773673830415,
   "config": [
     {
       "label": "Motore P25",
@@ -81,7 +81,7 @@
     },
     {
       "label": "Inverter P4",
-      "pn": "SY9Y-6A961-AK",
+      "pn": "SY9Y-6A961-AL",
       "dmxPN": 1,
       "dmxSN": 2,
       "dmxSep": "/",
