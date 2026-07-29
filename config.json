@@ -1,5 +1,5 @@
 {
-  "lastModified": 1785331560961,
+  "lastModified": 1785331638255,
   "config": [
     {
       "label": "Motore P25",
@@ -144,7 +144,7 @@
     },
     {
       "label": "Motore P4 sx",
-      "pn": "SY9Y-6A999-AE",
+      "pn": "SY9Y-6A999-AF",
       "descr": "",
       "dmxPN": 1,
       "dmxSN": 3,
@@ -193,7 +193,7 @@
     },
     {
       "label": "Motore P4 Dx",
-      "pn": "SY9Y-6A998-AE",
+      "pn": "SY9Y-6A998-AF",
       "descr": "",
       "dmxPN": 1,
       "dmxSN": 3,
