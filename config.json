@@ -1,9 +1,10 @@
 {
-  "lastModified": 1778773296296,
+  "lastModified": 1785331560961,
   "config": [
     {
       "label": "Motore P25",
       "pn": "SY9Y-15790-AB",
+      "descr": "",
       "dmxPN": 1,
       "dmxSN": 2,
       "dmxSep": "/",
@@ -49,6 +50,7 @@
     {
       "label": "Inverter p25",
       "pn": "SY9Y-14B298-AG",
+      "descr": "",
       "dmxPN": 1,
       "dmxSN": 2,
       "dmxSep": "/",
@@ -82,6 +84,7 @@
     {
       "label": "Inverter P4",
       "pn": "SY9Y-6A961-AL",
+      "descr": "",
       "dmxPN": 1,
       "dmxSN": 2,
       "dmxSep": "/",
@@ -142,6 +145,7 @@
     {
       "label": "Motore P4 sx",
       "pn": "SY9Y-6A999-AE",
+      "descr": "",
       "dmxPN": 1,
       "dmxSN": 3,
       "dmxSep": "/",
@@ -190,6 +194,7 @@
     {
       "label": "Motore P4 Dx",
       "pn": "SY9Y-6A998-AE",
+      "descr": "",
       "dmxPN": 1,
       "dmxSN": 3,
       "dmxSep": "/",
