@@ -1,5 +1,5 @@
 {
-  "lastModified": 1785331638255,
+  "lastModified": 1794235869797,
   "config": [
     {
       "label": "Motore P25",
@@ -49,7 +49,7 @@
     },
     {
       "label": "Inverter p25",
-      "pn": "SY9Y-14B298-AG",
+      "pn": "SY9Y-14B298-AK",
       "descr": "",
       "dmxPN": 1,
       "dmxSN": 2,
